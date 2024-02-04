@@ -1,0 +1,24 @@
+on:
+  workflow_call:
+    inputs:
+      project_path:
+        required: true
+        type: string
+jobs:
+  publish-nuget:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+    - name: Checkout main
+      uses: actions/checkout@v2
+    - name: Build
+      run: dotnet build ${{ inputs.project_path }} --configuration Release
+    - name: Pack
+      run: dotnet pack ${{ inputs.project_path }} --configuration Release --no-build --output .
+    - name: Push
+      run: |
+        dir
+        dir ./bin/Release
+      
+    
+  
