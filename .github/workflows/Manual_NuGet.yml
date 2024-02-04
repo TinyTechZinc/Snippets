@@ -9,4 +9,6 @@ jobs:
     uses: ./.github/workflows/NuGet.yml
     with:
       project_path: ${{ inputs.project_path }}
-    
+    secrets:
+      nuget_key: ${{ secrets.NUGET_API_KEY }}
+      
