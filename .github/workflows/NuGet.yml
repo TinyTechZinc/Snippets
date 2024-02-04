@@ -11,8 +11,6 @@ jobs:
   publish-nuget:
     runs-on: windows-latest
     timeout-minutes: 10
-    permissions:
-      packages: write
     steps:
     - name: Checkout main
       uses: actions/checkout@v2
