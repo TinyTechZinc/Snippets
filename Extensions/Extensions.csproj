@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <PackageId>TinyTechZinc.$(SolutionName).$(AssemblyName)</PackageId>
+    <PackageId>TinyTechZinc.Snippets.Extensions</PackageId>
     <Authors>TinyTechZinc</Authors>
     <Description>For personal projects and learning how to use NuGet.</Description>
     <PackageProjectUrl></PackageProjectUrl>
