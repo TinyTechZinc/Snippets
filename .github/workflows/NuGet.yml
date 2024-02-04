@@ -21,7 +21,7 @@ jobs:
     - name: Peek
       run: dir
     - name: Publish
-      run: dotnet nuget push *.nupkg --api-key ${{ secrets.nuget_key }}
+      run: dotnet nuget push *.nupkg --api-key ${{ secrets.nuget_key }} --source https://api.nuget.org/v3/index.json
       
     
   
