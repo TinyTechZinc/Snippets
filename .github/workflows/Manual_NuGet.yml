@@ -1,0 +1,12 @@
+on:
+  workflow_dispatch:
+    inputs:
+      project_path:
+        required: true
+        type: string
+jobs:
+  dispatch:
+    uses: ./.github/workflows/NuGet.yml
+    with:
+      project_path: ${{ inputs.project_path }}
+    
