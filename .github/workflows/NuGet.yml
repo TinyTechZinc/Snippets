@@ -1,0 +1,15 @@
+on:
+  push:
+    branches:
+    - main
+jobs:
+  publish-nuget:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Build
+      run: dir
+    
+  
