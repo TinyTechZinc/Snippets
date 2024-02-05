@@ -1,7 +1,7 @@
 on:
   push:
     tags:
-    - "v[0-9]+.[0-9]+.[0-9]+"
+    - "v([0-9].)+[0-9]+"
   workflow_dispatch:
 jobs:
   Check-Branch:
@@ -24,16 +24,19 @@ jobs:
   Get-Version:
     runs-on: ubuntu-latest
     outputs:
-      version: ${{ steps.get-version.output.VERSION }}
+      version: ${{ steps.get-version.output.version }}
     steps:
     - id: get-version
-      run: echo "VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_OUTPUT
+      run: |
+        version=${GITHUB_REF/refs\/tags\/v/}
+        echo version
+        echo "{name}=version" >> $GITHUB_OUTPUT
   debug:
     runs-on: ubuntu-latest
     needs: Get-Version
     steps:
     - name: debug
-      run: echo ${{ needs.Get-Verison.version }}
+      run: echo ${{ needs.Get-Verison.outputs.version }}
   Extensions:
     name: "Publish Extensions"
     needs: [Check-Branch, Get-Version]
