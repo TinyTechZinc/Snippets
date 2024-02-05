@@ -29,14 +29,16 @@ jobs:
     uses: ./.github/workflows/Get-Version.yml
   debug:
     runs-on: ubuntu-latest
-    needs: Get-Version
+    needs: [Get-Version, Check-Branch]
     steps:
     - name: debug
       run: echo ${{ needs.Get-Version.outputs.version }}
+    - name: debug1
+      run: echo ${{ needs.Check-Branch.outputs.is_on_main }}
   Extensions:
     name: "Publish Extensions"
     needs: [Check-Branch, Get-Version]
-    if: ${{ needs.Check-Branch.outputs.is_on_main }}
+    if: ${{ needs.Check-Branch.outputs.is_on_main }} == true
     uses: ./.github/workflows/NuGet.yml
     with:
       project_path: "./Extensions/Extensions.csproj"
