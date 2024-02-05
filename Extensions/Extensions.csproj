@@ -13,6 +13,7 @@
     <RepositoryUrl>https://github.com/TinyTechZinc/Snippets</RepositoryUrl>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <Version></Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
