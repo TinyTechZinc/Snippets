@@ -1,10 +1,16 @@
 on:
   push:
-    branches:
-    - main
+    tags:
+    - "v[0-9]+.[0-9]+.[0-9]+"
 jobs:
+  Check-Branch:
+    uses: ./.github/workflows/Is_Branch.yml
+    with:
+      branch: 'main'
   Extensions:
     name: "Publish Extensions"
+    needs: Check-Branch
+    if: needs.Check-Branch.outputs.is_branch
     uses: ./.github/workflows/NuGet.yml
     with:
       project_path: "./Extensions/Extensions.csproj"
