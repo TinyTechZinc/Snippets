@@ -23,6 +23,7 @@ jobs:
         id: get-branch
         run: |
           raw=$(git branch -r --contains ${{ github.ref }})
+          echo ${{ github.ref }}
           branch="$(echo ${raw//origin\//} | tr -d '\n')"
           echo "{name}=branches" >> $GITHUB_OUTPUT
           echo "Branches: $branches."
