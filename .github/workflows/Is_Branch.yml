@@ -7,7 +7,9 @@ on:
         type: string
     outputs:
       is_branch:
-        value: ${{ jobs.Check-Branch.outputs.is_branch }}
+        value: ${{ jobs.Get-Branch-Check.outputs.is_branch }}
+      branches:
+        value: ${{ jobs.Get-Branch-Check.outputs.branches }}
 jobs:
   Get-Branch-Check:
     runs-on: ubuntu-latest
@@ -16,16 +18,15 @@ jobs:
       is_branch: contains(${{ steps.get-branch.outputs.branches }}, ${{ inputs.branch }})
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - name: Get Branch
         id: get-branch
         run: |
           raw=$(git branch -r --contains ${{ github.ref }})
-          echo ${{ github.ref }}
           branch="$(echo ${raw//origin\//} | tr -d '\n')"
           echo "{name}=branches" >> $GITHUB_OUTPUT
-          echo "Branches: $branches."
+          echo "Branches: $branches"
     
     
