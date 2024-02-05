@@ -1,0 +1,7 @@
+on:
+  workflow_dispatch:
+jobs:
+  go:
+    uses: ./.github/workflows/Is_Branch.yml
+    with:
+      branch: 'main'
