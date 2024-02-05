@@ -38,7 +38,7 @@ jobs:
   Extensions:
     name: "Publish Extensions"
     needs: [Check-Branch, Get-Version]
-    if: ${{ needs.Check-Branch.outputs.is_on_main }} == true
+    if: needs.Check-Branch.outputs.is_on_main == 'true'
     uses: ./.github/workflows/NuGet.yml
     with:
       project_path: "./Extensions/Extensions.csproj"
