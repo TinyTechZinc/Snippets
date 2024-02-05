@@ -17,15 +17,24 @@ jobs:
       id: check_step
       run: |
         raw=$(git branch -r --contains ${{ github.ref }})
-        branch="$(echo ${raw//origin\//} | tr -d '\n')"
+        branches="$(echo ${raw//origin\//} | tr -d '\n')"
         echo "{name}=branches" >> $GITHUB_OUTPUT
         echo "Branches where this tag exists : $branches."
+  Get-Version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get-version.output.VERSION }}
+    steps:
+    - id: get-version
+      run: echo "VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_OUTPUT
+    - name: debug
   Extensions:
     name: "Publish Extensions"
-    needs: Check-Branch
-    if: ${{ needs.check.outputs.is_on_main }}
+    needs: [Check-Branch, Get-Version]
+    if: ${{ needs.Check-Branch.outputs.is_on_main }}
     uses: ./.github/workflows/NuGet.yml
     with:
       project_path: "./Extensions/Extensions.csproj"
+      version: ${{ needs.Get-Version.outputs.version }}
     secrets:
       nuget_key: ${{ secrets.NUGET_API_KEY }}
