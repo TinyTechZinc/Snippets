@@ -4,6 +4,12 @@ on:
       project_path:
         required: true
         type: string
+      version:
+        required: true
+        type: string
+    secrets:
+      nuget_key:
+        required: true
 jobs:
   publish-nuget:
     runs-on: windows-latest
@@ -11,14 +17,16 @@ jobs:
     steps:
     - name: Checkout main
       uses: actions/checkout@v2
+    - name: debug
+      run: echo ${{ inputs.version }}
     - name: Build
-      run: dotnet build ${{ inputs.project_path }} --configuration Release
+      run: dotnet build ${{ inputs.project_path }} --configuration Release /p:Version=${{ inputs.version }}
     - name: Pack
-      run: dotnet pack ${{ inputs.project_path }} --configuration Release --no-build --output .
-    - name: Push
-      run: |
-        dir
-        dir ./bin/Release
+      run: dotnet pack ${{ inputs.project_path }} --configuration Release /p:Version=${{ inputs.version }} --no-build --output .
+    - name: Peek
+      run: dir
+    - name: Publish
+      run: dotnet nuget push *.nupkg --api-key ${{ secrets.nuget_key }} --source https://api.nuget.org/v3/index.json
       
     
   

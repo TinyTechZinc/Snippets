@@ -1,0 +1,18 @@
+on:
+  workflow_call:
+    outputs:
+      version:
+        value: ${{ jobs.parse.outputs.version }}
+jobs:
+  parse:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get-version.outputs.version }}
+    steps:
+    - id: get-version
+      run: |
+        version_str=${GITHUB_REF/refs\/tags\/v/}
+        echo "$version_str"
+        echo "version=$version_str" >> $GITHUB_OUTPUT
+    - name: debug
+      run: echo ${{ steps.get-version.outputs.version }}

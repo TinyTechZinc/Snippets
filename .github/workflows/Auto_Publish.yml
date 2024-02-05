@@ -1,0 +1,46 @@
+on:
+  push:
+    tags:
+    - "v[0-9]+.[0-9]+.[0-9]+"
+    - "v[0-9]+.[0-9]+.[0-9]+.[0-9]+"
+  workflow_dispatch:
+jobs:
+  Check-Branch:
+    # see https://stackoverflow.com/a/77727776
+    runs-on: ubuntu-latest
+    outputs:
+      is_on_main: ${{ contains(steps.check_step.outputs.branches, 'main') }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - name: Get Current Branch
+      id: check_step
+      run: |
+        raw=$(git branch -r --contains ${{ github.ref }})
+        branches_str="$(echo ${raw//origin\//} | tr -d '\n')"
+        echo "branches=$branches_str" >> $GITHUB_OUTPUT
+        echo "Branches where this tag exists : $branches_str."
+    - name: debug
+      run: echo ${{ steps.check_step.outputs.branches }}
+  Get-Version:
+    uses: ./.github/workflows/Get-Version.yml
+  debug:
+    runs-on: ubuntu-latest
+    needs: [Get-Version, Check-Branch]
+    steps:
+    - name: debug
+      run: echo ${{ needs.Get-Version.outputs.version }}
+    - name: debug1
+      run: echo ${{ needs.Check-Branch.outputs.is_on_main }}
+  Extensions:
+    name: "Publish Extensions"
+    needs: [Check-Branch, Get-Version]
+    if: needs.Check-Branch.outputs.is_on_main == 'true'
+    uses: ./.github/workflows/NuGet.yml
+    with:
+      project_path: "./Extensions/Extensions.csproj"
+      version: ${{ needs.Get-Version.outputs.version }}
+    secrets:
+      nuget_key: ${{ secrets.NUGET_API_KEY }}
