@@ -9,7 +9,8 @@ jobs:
     # see https://stackoverflow.com/a/77727776
     runs-on: ubuntu-latest
     outputs:
-      is_on_main: contains(${{ steps.check_step.outputs.branches }}, 'main')
+      is_on_main_1: contains(${{ steps.check_step.outputs.branches }}, 'main')
+      is_on_main: false
     steps:
     - name: Checkout
       uses: actions/checkout@v3
