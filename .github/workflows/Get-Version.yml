@@ -2,7 +2,7 @@ on:
   workflow_call:
     outputs:
       version:
-        value: ${{ jobs.get-version.outputs.version }}
+        value: ${{ jobs.parse.outputs.version }}
 jobs:
   parse:
     runs-on: ubuntu-latest
