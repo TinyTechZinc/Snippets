@@ -17,6 +17,8 @@ jobs:
     steps:
     - name: Checkout main
       uses: actions/checkout@v2
+    - name: debug
+      run: echo ${{ inputs.version }}
     - name: Build
       run: dotnet build ${{ inputs.project_path }} --configuration Release /p:Version=${{ inputs.version }}
     - name: Pack
