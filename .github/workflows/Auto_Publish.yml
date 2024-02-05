@@ -20,9 +20,11 @@ jobs:
       id: check_step
       run: |
         raw=$(git branch -r --contains ${{ github.ref }})
-        branches="$(echo ${raw//origin\//} | tr -d '\n')"
-        echo "{name}=branches" >> $GITHUB_OUTPUT
-        echo "Branches where this tag exists : $branches."
+        branches_str="$(echo ${raw//origin\//} | tr -d '\n')"
+        echo "branches=$branches_str" >> $GITHUB_OUTPUT
+        echo "Branches where this tag exists : $branches_str."
+    - name: debug
+      run: echo ${{ steps.check_step.outputs.branches }}
   Get-Version:
     uses: ./.github/workflows/Get-Version.yml
   debug:
