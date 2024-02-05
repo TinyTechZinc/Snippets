@@ -25,6 +25,6 @@ jobs:
           raw=$(git branch -r --contains ${{ github.ref }})
           branch="$(echo ${raw//origin\//} | tr -d '\n')"
           echo "{name}=branches" >> $GITHUB_OUTPUT
-          echo "Branches where this tag exists : $branches."
+          echo "Branches: $branches."
     
     
