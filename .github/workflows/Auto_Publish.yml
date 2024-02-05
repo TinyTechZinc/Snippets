@@ -25,12 +25,12 @@ jobs:
   Get-Version:
     runs-on: ubuntu-latest
     outputs:
-      version: ${{ steps.get-version.output.version }}
+      version: ${{ steps.get-version.outputs.version }}
     steps:
     - id: get-version
       run: |
         version=${GITHUB_REF/refs\/tags\/v/}
-        echo version
+        echo "$version"
         echo "{name}=version" >> $GITHUB_OUTPUT
   debug:
     runs-on: ubuntu-latest
