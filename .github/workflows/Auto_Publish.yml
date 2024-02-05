@@ -27,6 +27,12 @@ jobs:
     steps:
     - id: get-version
       run: echo "VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_OUTPUT
+  debug:
+    runs-on: ubuntu-latest
+    needs: Get-Version
+    steps:
+    - name: debug
+      run: echo ${{ needs.Get-Verison.version }}
   Extensions:
     name: "Publish Extensions"
     needs: [Check-Branch, Get-Version]
