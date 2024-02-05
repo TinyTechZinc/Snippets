@@ -4,6 +4,9 @@ on:
       project_path:
         required: true
         type: string
+      version:
+        required: true
+        type: string
     secrets:
       nuget_key:
         required: true
@@ -15,9 +18,9 @@ jobs:
     - name: Checkout main
       uses: actions/checkout@v2
     - name: Build
-      run: dotnet build ${{ inputs.project_path }} --configuration Release
+      run: dotnet build ${{ inputs.project_path }} --configuration Release /p:Version=${{ inputs.version }}
     - name: Pack
-      run: dotnet pack ${{ inputs.project_path }} --configuration Release --no-build --output .
+      run: dotnet pack ${{ inputs.project_path }} --configuration Release /p:Version=${{ inputs.version }} --no-build --output .
     - name: Peek
       run: dir
     - name: Publish
