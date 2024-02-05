@@ -5,3 +5,9 @@ jobs:
     uses: ./.github/workflows/Is_Branch.yml
     with:
       branch: 'main'
+  check:
+    runs-on: ubuntu-latest
+    needs: go
+    steps:
+      - run: echo ${{ needs.go.outputs.branches }}
+      - run: echo ${{ needs.go.outputs.branches }}
