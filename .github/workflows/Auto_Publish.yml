@@ -1,0 +1,12 @@
+on:
+  push:
+    branches:
+    - main
+jobs:
+  Extensions:
+    name: "Publish Extensions"
+    uses: ./.github/workflows/NuGet.yml
+    with:
+      project_path: "./Extensions/Extensions.csproj"
+    secrets:
+      nuget_key: ${{ secrets.NUGET_API_KEY }}
