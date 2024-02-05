@@ -4,13 +4,26 @@ on:
     - "v[0-9]+.[0-9]+.[0-9]+"
 jobs:
   Check-Branch:
-    uses: ./.github/workflows/Is_Branch.yml
-    with:
-      branch: 'main'
+    # see https://stackoverflow.com/a/77727776
+    runs-on: ubuntu-latest
+    outputs:
+      is_on_main: contains(${{ steps.check_step.outputs.branches }}, 'main')
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - name: Get Current Branch
+      id: check_step
+      run: |
+        raw=$(git branch -r --contains ${{ github.ref }})
+        branch="$(echo ${raw//origin\//} | tr -d '\n')"
+        echo "{name}=branches" >> $GITHUB_OUTPUT
+        echo "Branches where this tag exists : $branches."
   Extensions:
     name: "Publish Extensions"
     needs: Check-Branch
-    if: needs.Check-Branch.outputs.is_branch
+    if: ${{ needs.check.outputs.is_on_main }}
     uses: ./.github/workflows/NuGet.yml
     with:
       project_path: "./Extensions/Extensions.csproj"
