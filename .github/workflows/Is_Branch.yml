@@ -28,5 +28,12 @@ jobs:
           branch="$(echo ${raw//origin\//} | tr -d '\n')"
           echo "{name}=branches" >> $GITHUB_OUTPUT
           echo "Branches: $branches"
+  debug:
+    runs-on: ubuntu-latest
+    needs: Get-Branch-Check
+    if: needs.Get-Branch-Check.outputs.is_branch
+    steps:
+      - name: check
+        run: echo "yes"
     
     
