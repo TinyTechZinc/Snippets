@@ -37,7 +37,7 @@ jobs:
     needs: Get-Version
     steps:
     - name: debug
-      run: echo ${{ needs.Get-Verison.outputs.version }}
+      run: echo ${{ needs.Get-Version.outputs.version }}
   Extensions:
     name: "Publish Extensions"
     needs: [Check-Branch, Get-Version]
