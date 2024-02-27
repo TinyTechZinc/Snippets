@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using Games.Properties;
+using System.Text.RegularExpressions;
 
 // Pulled from another repository of mine: https://github.com/TimothyZink/Maui_First
 
@@ -10,30 +11,55 @@ namespace Games.WordGuessingGame
 	public class WordGame
 	{
 		private readonly List<string> validWords;
+		private readonly List<string> solutionWords;
 		private string correctWord = default!;
 		private readonly Random random;
 		private readonly uint length;
+		private readonly bool enforceValidWords = true;
 		/// <summary>
-		/// Initialize the game with a list of valid words.
+		/// The default list of valid words.
+		/// Retrieved from: https://gist.github.com/dracos/dd0668f281e685bad51479e5acaadb93
 		/// </summary>
-		/// <param name="validWords">List of valid words.</param>
-		/// <param name="filterByLength">False, assumes that all the valid words are the correct length.</param>
+		public static List<string> DefaultValidWords
+		{
+			get => Resources._5LetterWords.Split(new string[] { "\n", "\r\n", "\r" }, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+					.Where(s => s.Length == 5).ToList();
+		}
+		/// <summary>
+		/// The default list of solution words.
+		/// Retrieved from: https://gist.github.com/scholtes/94f3c0303ba6a7768b47583aff36654d
+		/// </summary>
+		public static List<string> DefaultSolutionWords
+		{
+			get => Resources.SolutionWords.Split(new string[] { "\n", "\r\n", "\r" }, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+					.Where(s => s.Length == 5).ToList();
+		}
+		/// <summary>
+		/// Initialize the game with the default word lists.
+		/// </summary>
+		public WordGame() : this(DefaultValidWords, DefaultSolutionWords)
+		{ }
+		/// <summary>
+		/// Initialize the game.
+		/// </summary>
+		/// <param name="validWords">List of words to consider valid in addition to <see cref="solutionWords"/>.</param>
+		/// <param name="solutionWords">The solution will be selected from this list.</param>
 		/// <param name="length">The length of the words used, this limits guesses to this length.</param>
+		/// <param name="enforceValidWords">If true, checks each word guessed against the list of valid words.</param>
 		/// <exception cref="WordGameException"></exception>
-		public WordGame(List<string> validWords, bool filterByLength = false, uint length = 5)
+		public WordGame(List<string> validWords, List<string> solutionWords, uint length = 5, bool enforceValidWords = true)
 		{
 			this.length = length;
-			if (filterByLength)
-			{
-				this.validWords = validWords.Where(w => w.Length == length).ToList();
-			}
-			else
-			{
-				this.validWords = validWords;
-			}
+			this.validWords = validWords.Union(solutionWords).ToList();
+			this.solutionWords = solutionWords;
+			this.enforceValidWords = enforceValidWords;
 			if (validWords.Count == 0)
 			{
-				throw new WordGameException("No valid words in list.");
+				throw new WordGameException("No words in valid list.");
+			}
+			if (solutionWords.Count == 0)
+			{
+				throw new WordGameException("No words in solution list.");
 			}
 			random = new Random();
 			ChooseWord();
@@ -56,23 +82,22 @@ namespace Games.WordGuessingGame
 		public string ChooseWord()
 		{
 			var temp = correctWord;
-			correctWord = validWords[random.Next(validWords.Count)].ToLower();
+			correctWord = solutionWords[random.Next(solutionWords.Count)].ToLower();
 			return temp;
 		}
 		/// <summary>
-		/// Wrapper around GuessWord that returns a string of the states of the characters.
+		/// Wrapper around GuessWord that returns a string of the states.
 		/// </summary>
 		/// <param name="wordGuess"></param>
-		/// <param name="ignoreInvalid"></param>
 		/// <returns><list type="table">
 		/// <item><term>r</term><description><see cref="CharacterStates.Correct"/></description></item>
 		/// <item><term>p</term><description><see cref="CharacterStates.Partial"/></description></item>
 		/// <item><term>i</term><description><see cref="CharacterStates.Incorrect"/></description></item>
 		/// <item><term>' '</term><description><see cref="CharacterStates.None"/></description></item>
 		/// </list></returns>
-		public string StringGuessWord(string wordGuess, bool ignoreInvalid = false)
+		public string StringGuessWord(string wordGuess)
 		{
-			var guess = GuessWord(wordGuess, ignoreInvalid);
+			var guess = GuessWord(wordGuess);
 			return string.Join("", guess.Select(c => c.State switch
 			{
 				CharacterStates.Correct => 'r',
@@ -85,10 +110,9 @@ namespace Games.WordGuessingGame
 		/// Guess a word and get a list of characters and their state (Correct, incorrect, partial).
 		/// </summary>
 		/// <param name="testWord"></param>
-		/// <param name="ignoreInvalid">If true, an error will be thrown if the word is invalid.</param>
 		/// <returns></returns>
 		/// <exception cref="WordGameException"></exception>
-		public List<CharacterAndState> GuessWord(string testWord, bool ignoreInvalid = false)
+		public List<CharacterAndState> GuessWord(string testWord)
 		{
 			testWord = testWord.ToLower();
 			if (testWord.Length != length || correctWord.Length != length)
@@ -99,7 +123,7 @@ namespace Games.WordGuessingGame
 			{
 				throw new WordGameException("Invalid characters in test word.");
 			}
-			if (!ignoreInvalid && !validWords.Contains(testWord))
+			if (enforceValidWords && !validWords.Contains(testWord))
 			{
 				throw new WordGameException("Invalid word (not a word).");
 			}

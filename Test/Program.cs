@@ -1,12 +1,26 @@
 ﻿using Games.WordGuessingGame;
 
-WordGame game = new WordGame(new List<string> { "apple", "thing", "these", "dates", "tests" });
+WordGame game = new WordGame();
 
-Console.WriteLine(game.StringGuessWord("apple"));
-
-Console.WriteLine(game.StringGuessWord("thing"));
-
-Console.WriteLine(game.StringGuessWord("these"));
-
-Console.WriteLine(game.ChooseWord());
+do
+{
+	Console.WriteLine("Enter Word");
+	string? word = Console.ReadLine();
+	if (word == null || word.Length != 5)
+	{
+		Console.WriteLine("Enter a 5-letter word");
+	}
+	else
+	{
+		try
+		{
+			Console.WriteLine(game.StringGuessWord(word));
+		}
+		catch (WordGameException e)
+		{
+			Console.WriteLine(e.Message);
+		}
+	}
+}
+while (true);
 
