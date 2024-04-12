@@ -6,15 +6,20 @@
 	public static class ConsoleExtensions
 	{
 		/// <summary>
-		/// Print a tree data structure to the console.
+		/// Prints a tree data structure.
 		/// </summary>
 		/// <typeparam name="T">A tree node</typeparam>
 		/// <param name="node">The starting node</param>
-		/// <param name="getLeft">Returns the left child node</param>
-		/// <param name="getRight">Returns the right child node</param>
-		/// <param name="toString">Use for printing node to screen, uses <see cref="object.ToString"/> if null</param>
-		public static void PrintTree<T>(this T node, Func<T, T?> getLeft, Func<T, T?> getRight, Func<T, string>? toString = null)
+		/// <param name="getLeft">Function returning the left child node</param>
+		/// <param name="getRight">Function returning the right child node</param>
+		/// <param name="toString">Used for converting node to a string, uses <see cref="object.ToString"/> if null</param>
+		/// <param name="writeLine">Used for writing to stream, uses <see cref="Console.WriteLine(string)"/> if null</param>
+		public static void PrintTree<T>(this T node, Func<T, T?> getLeft, Func<T, T?> getRight, Func<T, string>? toString = null, Action<string>? writeLine = null)
 		{
+			if (writeLine == null)
+			{
+				writeLine = Console.WriteLine;
+			}
 			void Recurse(T? node, bool? goingRight, string prefix = "")
 			{
 				if (node == null)
@@ -34,7 +39,7 @@
 					left = $"{prefix}    ";
 				}
 				Recurse(getRight(node), true, right);
-				Console.WriteLine($"{prefix}{(goingRight != null ? goingRight.Value ? "┌── " : "└── " : "")}{(toString == null ? node.ToString() : toString(node))}");
+				writeLine($"{prefix}{(goingRight != null ? goingRight.Value ? "┌── " : "└── " : "")}{(toString == null ? node.ToString() : toString(node))}");
 				Recurse(getLeft(node), false, left);
 			}
 
