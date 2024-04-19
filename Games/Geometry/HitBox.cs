@@ -1,4 +1,6 @@
-﻿namespace Games.Geometry
+﻿using System.Drawing;
+
+namespace Games.Geometry
 {
 	/// <summary>
 	/// A hit box class that detects clipping between hit boxes.
@@ -8,14 +10,22 @@
 	public class HitBox
 	{
 		/// <summary>
+		/// A rectangle representing the outer bounds of the hit box.
+		/// </summary>
+		public RectangleF Bounds => Regions.Select(region => region.Bounds).Aggregate((a, b) => RectangleF.Union(a, b));
+		/// <summary>
 		/// The regions that make up the hit box.
 		/// </summary>
-		public IEnumerable<Region> Regions = [];
+		public List<Region> Regions = [];
+		/// <summary>
+		/// Get all the lines in this hit box.
+		/// </summary>
+		public IEnumerable<Line> Lines => Regions.SelectMany(region => region.Lines);
 		/// <summary>
 		/// Create a hit box with the set of regions.
 		/// </summary>
 		/// <param name="regions"></param>
-		public HitBox(IEnumerable<Region> regions) => Regions = regions;
+		public HitBox(IEnumerable<Region> regions) => Regions = regions.ToList();
 		/// <summary>
 		/// Check if the hit box intersects with another hit box.
 		/// Assumes the hit boxes have the same origin.
@@ -32,10 +42,22 @@
 		/// <param name="dx"></param>
 		/// <param name="dy"></param>
 		/// <returns></returns>
+		[Obsolete]
 		public bool ClipsThrough(HitBox hitBox, float dx, float dy)
 		{
-			return Regions.SelectMany(region => region.Points).Any(currentPoint => hitBox.Regions.Any(
-				region => region.IntersectedBy(new Line(currentPoint.X, currentPoint.Y, currentPoint.X + dx, currentPoint.Y + dy))));
+			// Get all the points in this hitbox
+			var points = Regions.SelectMany(region => region.Points).ToList();
+			// Draw lines from each point to its new location
+			foreach (var point in points)
+			{
+				var line = new Line(point.X, point.Y, point.X + dx, point.Y + dy);
+				// Check if the line intersects with any of the lines in the other hitbox
+				if (hitBox.Regions.Any(region => region.IntersectedBy(line)))
+				{
+					return true;
+				}
+			}
+			return false;
 		}
 		/// <summary>
 		/// Offset the hit box by the given amount.
@@ -51,7 +73,29 @@
 		/// <param name="dx"></param>
 		/// <param name="dy"></param>
 		/// <returns></returns>
-		public bool WillClip(HitBox hitBox, float dx, float dy) => ClipsThrough(hitBox, dx, dy) || hitBox.ClipsThrough(this, -dx, -dy);
+		public bool WillClip(HitBox hitBox, float dx, float dy)
+		{
+			// Get all the points in this hitbox and create lines to each one's new location
+			var myLines = Regions.SelectMany(region => region.Points).Select(point => new Line(point.X, point.Y, point.X + dx, point.Y + dy)).ToList();
+			// Do the same for the other hitbox
+			var otherLines = hitBox.Regions.SelectMany(region => region.Points).Select(point => new Line(point.X, point.Y, point.X - dx, point.Y - dy)).ToList();
+			// Check if the movement lines intersect any of the other hitbox's normal lines
+			foreach (var lineM in myLines)
+			{
+				if (hitBox.Lines.Any(lineM.Intersects))
+				{
+					return true;
+				}
+			}
+			foreach (var lineO in otherLines)
+			{
+				if (Lines.Any(lineO.Intersects))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
 		/// <summary>
 		/// Get the hit boxes that will be clipped by this hit box when moves.
 		/// </summary>
@@ -117,6 +161,10 @@
 					testY /= 2;
 				}
 			}
+			if (hitBoxes.Any(hitBoxes => hitBoxes.Intersects(this.Offset(safeX, safeY))))
+			{
+				//throw new Exception("Collision not resolved.");
+			}
 			// Return the resulting movement
 			return (safeX, safeY);
 		}
@@ -125,27 +173,39 @@
 		/// </summary>
 		/// <param name="hitBoxes"></param>
 		/// <param name="angle"></param>
-		/// <param name="margin">Margin of error.</param>
+		/// <param name="step"></param>
 		/// <returns></returns>
-		public HitBox Rotate(IEnumerable<HitBox> hitBoxes, float angle, float margin)
+		public HitBox RotateCollide(IEnumerable<HitBox> hitBoxes, float angle, float step)
 		{
-			var test = new HitBox(Regions.Select(region => region.Rotate(angle)));
-			if (!GetCollisions(hitBoxes, 0, 0).Any())
+			if (hitBoxes.Any(Intersects))
 			{
-				return test;
+				return this;
 			}
+			angle %= (float)(2 * Math.PI);
+			var safe = this;
+			var test = this;
 			float safeAngle = 0;
-			float testAngle = angle / 2;
-			while (Math.Abs(testAngle) > margin)
+			float testAngle = 0;
+			while (!hitBoxes.Any(test.Intersects) && safeAngle != angle)
 			{
-				test = test.Rotate(hitBoxes, testAngle, margin);
-				if (!test.GetCollisions(hitBoxes, 0, 0).Any())
+				safe = test;
+				safeAngle = testAngle;
+				testAngle = (safeAngle + step) % (float)(2 * Math.PI);
+				if (testAngle > angle)
 				{
-					safeAngle += testAngle;
+					testAngle = angle;
 				}
-				testAngle /= 2;
+				test = Rotate(testAngle);
 			}
-			return test;
+			return safe;
 		}
+		/// <summary>
+		/// Rotate the hit box by the given angle.
+		/// 
+		/// The rotation is around the center of the hit box.
+		/// </summary>
+		/// <param name="angle"></param>
+		/// <returns>A new hit box with the rotation applied.</returns>
+		public HitBox Rotate(float angle) => new HitBox(Regions.Select(region => region.Rotate(angle, Bounds.Width / 2 - Bounds.Location.X, Bounds.Height / 2 - Bounds.Location.Y)));
 	}
 }

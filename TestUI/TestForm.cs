@@ -7,6 +7,7 @@ namespace TestUI
 		public float dX;
 		public float dY;
 		public HitBox hitBox;
+		public float dR = 10;
 	}
 	public partial class TestForm : Form
 	{
@@ -29,9 +30,7 @@ namespace TestUI
 
 		private void TestForm_Load(object sender, EventArgs e)
 		{
-
-
-
+			
 		}
 
 		private void pictureBox_Paint(object sender, PaintEventArgs e)
@@ -41,7 +40,14 @@ namespace TestUI
 				DrawHitBox(e.Graphics, h);
 			}
 			DrawHitBox(e.Graphics, player);
-		}
+			var b = new HitBox([RegionFactory.CreateRectangle(100, 100, 30, 30)]);
+			DrawHitBox(e.Graphics, b);
+			DrawHitBox(e.Graphics, b.Offset(100, 100));
+			DrawHitBox(e.Graphics, b.Rotate(0.1f));
+			var r = new HitBox([RegionFactory.CreateRectangle(100, 200, 30, 30)]);
+			DrawHitBox(e.Graphics, r);
+			DrawHitBox(e.Graphics, new HitBox([RegionFactory.CreateRectangle(100, 200, 30, 30).Rotate(0.2f, -100 + 30, -200 + 30)]));
+        }
 
 		private void TestForm_KeyUp(object sender, KeyEventArgs e)
 		{
@@ -50,16 +56,16 @@ namespace TestUI
 			switch (e.KeyCode)
 			{
 				case Keys.W:
-					safe = player.Collide(AllBoxes, 0, -10, 0.5f, true);
+					safe = player.Collide(AllBoxes, 0, -60, 0.5f, true);
 					break;
 				case Keys.A:
-					safe = player.Collide(AllBoxes, -10, 0, 0.5f, true);
+					safe = player.Collide(AllBoxes, -60, 0, 0.5f, true);
 					break;
 				case Keys.S:
-					safe = player.Collide(AllBoxes, 0, 10, 0.5f, true);
+					safe = player.Collide(AllBoxes, 0, 60, 0.5f, true);
 					break;
 				case Keys.D:
-					safe = player.Collide(AllBoxes, 10, 0, 0.5f, true);
+					safe = player.Collide(AllBoxes, 60, 0, 0.5f, true);
 					break;
 				default:
 					break;
@@ -70,10 +76,11 @@ namespace TestUI
 			for(int i = 0; i < Movers.Count; i++)
 			{
 				var m = Movers[i];
-				var mSafe = m.hitBox.Collide(AllBoxes.Where(h => h != m.hitBox), m.dX, m.dY, 0.5f, true);
-				m.hitBox = m.hitBox.Offset(mSafe.dX, mSafe.dY);
+				m.hitBox = m.hitBox.RotateCollide(AllBoxes.Where(h => h != m.hitBox), m.dR, 0.5f);
+				var (dX, dY) = m.hitBox.Collide(AllBoxes.Where(h => h != m.hitBox), m.dX, m.dY, 0.5f, true);
+				m.hitBox = m.hitBox.Offset(dX, dY);
 			}
-			pictureBox.Invalidate();
+			pictureBox.Refresh();
 		}
 
 		private void pictureBox_Click(object sender, EventArgs e)
@@ -82,7 +89,8 @@ namespace TestUI
 
 		private void pictureBox_MouseUp(object sender, MouseEventArgs e)
 		{
-			Movers.Add(new Mover { dX = 21, dY = 21, hitBox = new HitBox([RegionFactory.CreateRectangle(e.X, e.Y, 20, 20)]) });
+			// TODO: fix bug where mover can clip through walls (seems to happen if dx >= width)
+			Movers.Add(new Mover { dX = 21, dY = 10, hitBox = new HitBox([RegionFactory.CreateRectangle(e.X, e.Y, 20, 20)]) });
 		}
 	}
 }

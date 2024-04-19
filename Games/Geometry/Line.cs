@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using static System.Net.WebRequestMethods;
 
 namespace Games.Geometry
 {
@@ -39,31 +40,37 @@ namespace Games.Geometry
 		}
 		/// <summary>
 		/// Check for intersection with another line segment.
+		/// <br/>
+		/// <see href="https://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/"/>
 		/// </summary>
 		/// <param name="other"></param>
-		/// <returns></returns>
+		/// <returns>True if the lines intersect.</returns>
 		public bool Intersects(Line other)
 		{
-			// https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection
-			var x1 = Start.X;
-			var y1 = Start.Y;
-			var x2 = End.X;
-			var y2 = End.Y;
-			var x3 = other.Start.X;
-			var y3 = other.Start.Y;
-			var x4 = other.End.X;
-			var y4 = other.End.Y;
-			var d = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
-			if (d == 0)
+			static bool CoLinearPointOnSegment(PointF start, PointF end, PointF point)
 			{
-				return false;
+				return point.X <= Math.Max(start.X, end.X) && point.X >= Math.Min(start.X, end.X)
+					&& point.Y <= Math.Max(start.Y, end.Y) && point.Y >= Math.Min(start.Y, end.Y);
 			}
-			var a = x1 * y2 - y1 * x2;
-			var b = x3 * y4 - y3 * x4;
-			var x = (a * (x3 - x4) - (x1 - x2) * b) / d;
-			var y = (a * (y3 - y4) - (y1 - y2) * b) / d;
-			return x >= Math.Min(x1, x2) && x <= Math.Max(x1, x2) && y >= Math.Min(y1, y2) && y <= Math.Max(y1, y2) &&
-				   x >= Math.Min(x3, x4) && x <= Math.Max(x3, x4) && y >= Math.Min(y3, y4) && y <= Math.Max(y3, y4);
+			static int GetOrientation(PointF a, PointF b, PointF c)
+			{
+				float val = (b.Y - a.Y) * (c.X - b.X) - (b.X - a.X) * (c.Y - b.Y);
+				if (val == 0) return 0; // Co-linear
+				return (val > 0) ? 1 : 2; // Clockwise or counter-clockwise
+			}
+			var o1 = GetOrientation(Start, End, other.Start);
+			var o2 = GetOrientation(Start, End, other.End);
+			var o3 = GetOrientation(other.Start, other.End, Start);
+			var o4 = GetOrientation(other.Start, other.End, End);
+
+			if (o1 != o2 && o3 != o4) return true;
+
+			if (o1 == 0 && CoLinearPointOnSegment(Start, End, other.Start)) return true;
+			if (o2 == 0 && CoLinearPointOnSegment(Start, End, other.End)) return true;
+			if (o3 == 0 && CoLinearPointOnSegment(other.Start, other.End, Start)) return true;
+			if (o4 == 0 && CoLinearPointOnSegment(other.Start, other.End, End)) return true;
+
+			return false;
 		}
 	}
 }
