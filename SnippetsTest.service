@@ -1,0 +1,23 @@
+# Adapted from https://swimburger.net/blog/dotnet/how-to-run-a-dotnet-core-console-app-as-a-service-using-systemd-on-linux
+[Unit]
+Description=Runs the test project for Snippets
+
+[Service]
+# systemd will run this executable to start the service
+# if /usr/bin/dotnet doesn't work, use `which dotnet` to find correct dotnet executable path
+ExecStart=/home/host/Projects/Snippets/start-server.sh
+# to query logs using journalctl, set a logical name here
+SyslogIdentifier=SnippetsTest
+
+# Use your username to keep things simple.
+# If you pick a different user, make sure dotnet and all permissions are set correctly to run the app
+# To update permissions, use 'chown yourusername -R /srv/HelloWorld' to take ownership of the folder and files,
+#       Use 'chmod +x /srv/HelloWorld/HelloWorld' to allow execution of the executable file
+User=host
+
+# This environment variable is necessary when dotnet isn't loaded for the specified user.
+# To figure out this value, run 'env | grep DOTNET_ROOT' when dotnet has been loaded into your shell.
+#Environment=DOTNET_ROOT=/usr/lib64/dotnet
+
+[Install]
+WantedBy=multi-user.target
