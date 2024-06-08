@@ -4,6 +4,7 @@
 Description=Runs the test project for Snippets
 
 [Service]
+WorkingDirectory=/srv/Snippets/
 # systemd will run this executable to start the service
 # if /usr/bin/dotnet doesn't work, use `which dotnet` to find correct dotnet executable path
 ExecStart=/srv/Snippets/start-server.sh
