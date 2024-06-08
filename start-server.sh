@@ -1,4 +1,5 @@
 #!/bin/bash
+cd /srv/Snippets/
 
 # Pull changes (if any).
 git pull
